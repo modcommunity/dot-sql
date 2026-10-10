@@ -52,7 +52,7 @@ func is_available() -> DotResult:
 		return DotResult.fail(
 			DotError.CODE_UNSUPPORTED,
 			"The SQLite GDExtension is not installed.",
-			"run dot-sql's tools/fetch_sqlite.sh <project> (godot-sqlite), or point the store at a SQL gateway"
+			"run dot-sql's tools/fetch_sqlite.sh <project> and then --import it (Godot loads only the extensions .godot/extension_list.cfg names, and only an import writes that), or point the store at a SQL gateway"
 		)
 	if not ClassDB.can_instantiate(EXTENSION_CLASS):
 		return DotResult.fail(
