@@ -19,11 +19,11 @@ extends DotSqlDriver
 ## records and the wrong one for five servers sharing them; that is
 ## [DotSqlDriverGateway]'s job. WAL mode lets a web panel read while the server writes.
 ##
-## [b]What the suite covers.[/b] The extension is not installed on the machine that runs
-## the suites, so the SQL this driver would send is exercised against real SQLite through
-## [DotSqlDriverGateway] and `tools/sql_gateway.py` instead — the same statements, a
-## different pipe. Everything below [method is_available] is written to the extension's
-## documented API and is the one layer here that has not been run.
+## [b]What the suite covers.[/b] `tools/fetch_sqlite.sh` installs a pinned godot-sqlite
+## release, and with it present `tools/test_live.sh` runs the live suite through this driver
+## as well as through the gateway. WAL plus the extension's default `synchronous=FULL`
+## means a committed write survives the process being killed, which on a headless server
+## is how it always stops: Godot runs no exit notification on SIGINT or SIGTERM.
 
 const EXTENSION_CLASS := "SQLite"
 
@@ -52,7 +52,7 @@ func is_available() -> DotResult:
 		return DotResult.fail(
 			DotError.CODE_UNSUPPORTED,
 			"The SQLite GDExtension is not installed.",
-			"install github.com/2shady4u/godot-sqlite into addons/, or point the store at a SQL gateway"
+			"run dot-sql's tools/fetch_sqlite.sh <project> (godot-sqlite), or point the store at a SQL gateway"
 		)
 	if not ClassDB.can_instantiate(EXTENSION_CLASS):
 		return DotResult.fail(
@@ -70,6 +70,17 @@ func open() -> DotResult:
 	var available := is_available()
 	if not available.ok:
 		return available
+
+	# SQLite creates the file but not the directory it goes in, and says only "unable to
+	# open database file". A game's default is a path under a directory of its own
+	# (user://g2gfast/records.db), which on a fresh server does not exist yet, so every
+	# first boot fell back to whatever the store does without a database.
+	if path != ":memory:":
+		var dir := path.get_base_dir()
+		if dir != "" and not DirAccess.dir_exists_absolute(dir):
+			var made := DirAccess.make_dir_recursive_absolute(dir)
+			if made != OK:
+				return DotResult.fail(DotError.CODE_IO, "Could not create the database's directory.", "%s: %s" % [dir, error_string(made)])
 
 	_db = ClassDB.instantiate(EXTENSION_CLASS)
 	if _db == null:

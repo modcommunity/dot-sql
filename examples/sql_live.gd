@@ -22,17 +22,28 @@ var _failed := 0
 var _entered := 0
 var _completed := 0
 
-var driver: DotSqlDriverGateway = null
+## A gateway, or the real godot-sqlite extension when DOT_SQL_SQLITE_PATH is set.
+var driver: DotSqlDriver = null
 
 
 func _ready() -> void:
 	DotLog.set_level(DotLog.Level.ERROR)
 
+	# The extension itself, no gateway: the only run that reaches DotSqlDriverSqlite's
+	# calls into godot-sqlite rather than the SQL they would send.
+	var sqlite_path := OS.get_environment("DOT_SQL_SQLITE_PATH")
+	if sqlite_path != "":
+		var direct := DotSql.from_config({"driver": "sqlite", "path": sqlite_path}, self)
+		driver = direct.value
+		print("dot-sql live: sqlite (extension)")
+		await _run()
+		return
+
 	var url := OS.get_environment("DOT_SQL_URL")
 	var dialect := DotSqlDialect.from_name(OS.get_environment("DOT_SQL_DIALECT"))
 	var token_file := OS.get_environment("DOT_SQL_TOKEN_FILE")
 	if url == "" or dialect < 0 or token_file == "":
-		print("set DOT_SQL_URL, DOT_SQL_DIALECT and DOT_SQL_TOKEN_FILE; see tools/test_live.sh")
+		print("set DOT_SQL_SQLITE_PATH, or DOT_SQL_URL, DOT_SQL_DIALECT and DOT_SQL_TOKEN_FILE; see tools/test_live.sh")
 		get_tree().quit(2)
 		return
 
@@ -60,7 +71,7 @@ func _test_open() -> void:
 	_section("open")
 
 	var opened := await driver.open()
-	_check("the gateway answers", opened.ok, opened)
+	_check("the database answers", opened.ok, opened)
 
 	# Fresh tables every run; a previous failed run may have left them.
 	await driver.execute("DROP TABLE IF EXISTS dot_sql_live")

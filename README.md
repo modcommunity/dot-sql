@@ -87,7 +87,7 @@ DOT_SQL_PG_DSN=postgresql://u:p@127.0.0.1/test DOT_SQL_MYSQL_DSN=mysql://u:p@127
 
 ## Not done yet
 
-- The SQLite driver has not been run against the real GDExtension. Its SQL is tested against real SQLite through the gateway, but the extension calls themselves are written from its documentation.
+- The SQLite driver needs the godot-sqlite GDExtension, which this asset does not ship. `tools/fetch_sqlite.sh <your project>` installs a pinned, checksummed release (v4.9, MIT) into `addons/godot-sqlite`.
 - The reference gateway handles one request at a time. It is fine for a few servers and is meant to be copied, not scaled.
 
 ## License

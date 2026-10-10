@@ -53,6 +53,23 @@ run() {
 }
 
 run sqlite "$work/live.db"
+
+# And SQLite through the extension itself, with no gateway in between, when the project
+# has it (tools/fetch_sqlite.sh). The only run that reaches DotSqlDriverSqlite's calls.
+if [ -f "$project/addons/godot-sqlite/gdsqlite.gdextension" ]; then
+    echo "== sqlite (extension)"
+    DOT_SQL_SQLITE_PATH="$work/direct.db" timeout 120 "$godot" --headless --path "$project" "$scene" \
+        > "$work/out-direct.log" 2>&1
+    code=$?
+    # The extension prints its own ERROR for each statement a suite fails on purpose.
+    grep -v "^Godot Engine\|^$\|^ERROR:  --> SQL error\|^   at: \|^   GDScript backtrace\|^       \[" "$work/out-direct.log" | grep -v "^  .* ok$" || true
+    if grep -q "SCRIPT ERROR\|Parse Error" "$work/out-direct.log"; then
+        echo "   (script errors above)"; code=1
+    fi
+    [ "$code" -eq 0 ] || failed=1
+else
+    echo "== sqlite (extension): not installed here; tools/fetch_sqlite.sh . to run it"
+fi
 [ -n "${DOT_SQL_PG_DSN:-}" ] && run postgres "$DOT_SQL_PG_DSN"
 [ -n "${DOT_SQL_MYSQL_DSN:-}" ] && run mysql "$DOT_SQL_MYSQL_DSN"
 
