@@ -1,0 +1,13 @@
+# comments
+# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add.
+addons/dot_sql/core/dot_sql.gd::long_block	2
+addons/dot_sql/core/dot_sql_dialect.gd::long_block	8
+addons/dot_sql/core/dot_sql_migrator.gd::long_block	1
+addons/dot_sql/core/dot_sql_schema.gd::long_block	2
+addons/dot_sql/dot_sql_plugin.gd::long_block	1
+addons/dot_sql/driver/dot_sql_driver.gd::long_block	2
+addons/dot_sql/driver/dot_sql_driver_gateway.gd::long_block	2
+addons/dot_sql/driver/dot_sql_driver_recording.gd::long_block	1
+addons/dot_sql/driver/dot_sql_driver_sqlite.gd::long_block	3
+examples/sql_live.gd::long_block	1
+examples/sql_selftest.gd::long_block	1
