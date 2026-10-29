@@ -24,8 +24,6 @@ extends RefCounted
 ## statistics, achievements and bans in one SQLite file is one connection and one place to
 ## back up; each store prefixes its own tables, so they never collide.
 
-const CHANNEL := "sql"
-
 
 ## A driver for [param config], not yet open. [param host] is where the gateway's
 ## [DotHttp] is parented, since [HTTPRequest] is a Node; ignored for SQLite.
