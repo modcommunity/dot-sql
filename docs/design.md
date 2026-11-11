@@ -6,7 +6,7 @@ Why the addon is shaped the way it is, and why the obvious alternative is wrong 
 
 Every addon with a SQL store (dot-timer, dot-moderation, dot-leaderboard, dot-achievements, dot-stats) holds its driver in an untyped variable and calls `query`, `execute`, `batch`, `upsert_sql`, `migrate` and `ensure_table` on it. None of them names a `DotSql*` class. In GDScript naming a `class_name` the project lacks is a parse error that takes every referencing script down with it, so a store that typed its driver as `DotSqlDriver` would make its whole addon fail to load in a project without dot-sql. Duck-typed, SQL is a thing a host adds. Only examples (suites) name dot-sql classes, and a repository whose suites do lists `/addons/dot_sql` in its `.gitignore` as a test dependency. No addon depends on dot-sql, and that is the design.
 
-The same rule reaches games: a game delivered as a pack must not name `DotSql` either, because a pack parses against whatever addons the host build carries. game-g2gfast loads `res://addons/dot_sql/core/dot_sql.gd` by path and calls `from_config` on the script.
+The same rule reaches games: a game delivered as a pack must not name `DotSql` either, because a pack parses against whatever addons the host build carries. game-airdrift loads `res://addons/dot_sql/core/dot_sql.gd` by path and calls `from_config` on the script.
 
 **The contract, as plain data:** statements use `?` in every dialect; `query` answers an Array of Dictionary rows; numbers may come back as float (a gateway's JSON has one number type), so a row mapper wraps integers in `int()`; JSON columns may come back as text; booleans may come back as bool, int, float or string; every method returns a `DotResult` and is a coroutine, so callers always `await`.
 
